@@ -1,0 +1,1689 @@
+---
+title: "REGRESSION ANALYSIS LAB - DSM1072"
+author: "ABDUL RAUF"
+date: "2023-01-24"
+output: html_document
+---
+\pagenumbering{roman}
+\newpage
+\pagenumbering{arabic}
+
+**NAME**:-***$ABDUL \ \  RAUF$***
+  
+**ROLL**:-**$22DSMSA116$**
+  
+**ENRL NO**:-**$GL6092$**      
+                      
+ 
+# LAB 1
+
+## ADVERTISING 
+
+### Read the Advertising data from excel
+```{r}
+advrt=read.csv("advertising.csv") #to read the advertising data from excel to R.
+head(advrt) #Show the head of the advertising data.
+tail(advrt) #Show the tail part of the advertising data.
+
+```
+
+### FIT THE MODEL
+
+$Sales=\beta_0+\beta_1\times TV+\epsilon$
+
+#### Extraction of vaues
+
+```{r }
+y=advrt$sales  #extracting the data of sales and storing values in y
+x=advrt$TV    #extracting the data of TV and storing values in x
+
+```
+
+#### Calculating b1 i.e beta1
+$\beta_1 =\frac{\sum(x_i-\bar x)(y_i-\bar y)}{\sum((x_i-\bar x)^2)}$
+
+```{r }
+xbar=mean(x)
+xbar
+ybar=mean(y)
+ybar
+xdev=(x-xbar)
+ydev=(y-ybar)
+Sxy=sum(xdev*ydev)
+Sxx=sum(xdev^2)
+b1=Sxy/Sxx
+b1 #coefficient of TV
+```
+
+### Calculating b0 i.e beta0
+
+$\hat\beta_0=\bar y-\hat\beta_1\times\bar x$
+
+```{r }
+b0=ybar-(b1*xbar)
+b0  #value of intercept
+```
+
+
+### Fitted line for sales due to advertisement on TV
+
+#### yhat
+
+$\hat y=\hat\beta_0+\hat\beta_1*x$
+
+```{r }
+yhat=b0+b1*x
+length(yhat)
+yhat[1:20]  # estimated sales or observed sales based on advertisement on TV
+```
+### Residuals or errors
+
+$\epsilon=y-\hat y$
+
+```{r }
+e=y-yhat
+e[1:20]      #differnce betwn sales and observed sales(i.e sales after advertising on TV)
+length(e)
+```
+
+
+### Calculate SSE, MSE & Residual statndard error (RSE)
+
+$SSE=\sum e_i^2$=$SSE=\sum((y_i-\hat y_i))^2)$   Sum of square due to residual
+
+$MSE=SSE/(n-2)$  ,where (n-2) is the degree of freedom as 2 degree of freedom get lost as we estimated from sample.
+
+$RSE=\sqrt(MSE)$
+ 
+```{r }
+n=length(y)
+SSE=sum(e^2)
+SSE
+MSE=SSE/(n-2)
+MSE
+RSE=sqrt(MSE)
+RSE
+```
+
+
+
+### The standard error of $\hat\beta_0$ and $\hat\beta_1$
+
+$SE(\hat\beta_0)=\sqrt(MSE(\frac{1}{n}+\frac{\bar{x}^2}{S_{xx}})$
+
+$SE(\hat\beta_1)=\sqrt(\frac{MSE}{S_{xx}}$
+
+```{r }
+SEb0=sqrt(MSE/Sxx)
+SEb1=sqrt(MSE*(1/n+(xbar)^2/Sxx))
+c(SEb0,SEb1)
+
+```
+
+
+ 
+### Confidence Interval of $\hat\beta_0$ and $\hat\beta_1$
+
+CI of $\beta_0$ = $\hat\beta_0\pm t_(\alpha/2,n-2)*SE(\hat\beta_0))$
+
+CI of $\beta_1$ = $\hat\beta_1\pm t_(\alpha/2,n-2)*SE(\hat\beta_1))$
+
+```{r }
+cv=qt(p=0.975,df=198) 
+
+llb0=b0-cv*SEb0     #lower limit of CI for b0
+ulb0=b0+cv*SEb0     #upper limit of CI for b0
+cib0=c(llb0,ulb0)   # CI for b0
+cib0
+
+llb1=b1-cv*SEb1     #lower limit of CI for b1                 
+ulb1=b1+cv*SEb1    #upper limit of CI for b1
+cib1=c(llb1,ulb1)   # CI for b1
+cib1
+```
+ CI for $\beta_0$ is{7.027288,7.037899}
+ CI for $\beta_1$ is{-0.8553376,0.9504109}
+
+### Coefficient of Determinaton.
+
+$R^2=\frac{SSR}{TSS}=1-\frac{SSE}{TSS}$
+
+$TSS=\sum(y-\bar y)^2$
+
+```{r }
+TSS=sum((y-ybar)^2)
+Rsquared=1-(SSE/TSS)
+Rsquared 
+```
+### Scatter plot
+
+```{r}
+plot(y~x)
+abline(7.03259,0.047536,untf = FALSE,lwd=3, col="dark blue")
+
+```
+### Correlation coefficient
+
+Extent of correlation is explained by correlation coefficient.
+
+```{r}
+corl=cor(x,y)
+corl
+```
+### Using `lm()` function:
+
+```{r}
+m<-lm(y~x,data = advrt)
+summary(m)
+```
+
+
+### CONCLUSION:
+
+* Our model is:
+$SALES=\beta_0 +\beta_1 \times ADVERTISEMENT \ ON \ TV$
+
+ $SALES =7.03259 + 0.47537 \times ADVERTISEMENT \ ON \ TV$
+
+* we find that form the above calculation and from `lm()` funtion we get the same value for the intercept and coeff. of  x or sales
+
+**Intercept**=7.03259 & **Coeff. of advertisement on TV**=0.47537
+
+* From the estimated value of beta0 and beta1 we can conclude that if the advertisement on TV increases by 1unit then sales get increased by 0.47537 unit.And if we don't advertise on TV then our sales will be 7.03259.
+
+
+* From the **Scatter plot** we come to the conclusion that sales and advertisement on TV are correlated and they are positively correlated. the distance of the  points that are away from the fitted line are the errors.
+
+* As they are correlated so the extent of correlation is explained by **coefficient of correlation** i.e corl=0.7822 , which is nearly equal to 1 that implies that advertisement of TV is highly correlated to sales.
+
+* **p-value** is 2.2e-16 that is very less than 0.05 so advertisement on TV is significant so our null hypothesis is rejected i.e advertisement on TV has no impact on sales but sales get affected by the advertisement on TV .
+
+* **Rsquared** =0.6119 which means 61.19% percent of the variability of sales is explained by advertisement on TV.
+
+* **t value** can be calculated by dividing estimate by standard error (estimate/std.error)
+t value for x or advertisement on TV  is t_value=17.67 
+
+* **RSE** Residual standard error tells us that the regression model predicts the sales with the average error of 3.258.
+
+* From the **Confidence interval** we can interpret that we are 95% sure that the correlation between sales and advertisement on TV is between  -0.8553376 & 0.9504109
+
+
+## Assingment-2
+### FIT THE MODEL
+$Sales=\beta_0+\beta_1\times NEWSPAPER+\epsilon$
+
+### Extraction of vaues
+```{r extraction}
+y=advrt$sales  #extracting the data of sales and storing values in y
+x=advrt$newspaper    #extracting the data of TV and storing values in x
+
+```
+### Calculating b1 i.e beta1
+$\beta_1 =\frac{\sum(x_i-\bar x)(y_i-\bar y)}{\sum((x_i-\bar x)^2)}$
+
+```{r beta1}
+xbar=mean(x)
+xbar
+ybar=mean(y)
+ybar
+xdev=(x-xbar)
+ydev=(y-ybar)
+Sxy=sum(xdev*ydev)
+Sxx=sum(xdev^2)
+b1=Sxy/Sxx
+b1 #coefficient of Newspaper
+```
+
+### Calculating b0 i.e beta0
+
+$\hat\beta_0=\bar y-\hat\beta_1\times\bar x$
+
+```{r beta0}
+b0=ybar-(b1*xbar)
+b0  #value of intercept
+```
+
+
+### Fitted line for sales due to advertisement on Newspaper
+
+#### yhat
+
+$\hat y=\hat\beta_0+\hat\beta_1*x$
+
+```{r observed y}
+yhat=b0+b1*x 
+yhat[1:20]  # estimated sales or observed sales based on advertisement on newspaper
+```
+### Residuals or errors
+
+$\epsilon=y-\hat y$
+
+```{r residual}
+e=y-yhat
+e[1:20]  #differnce betwn sales and observed sales(i.e sales after advertising on Newspaper)
+```
+
+
+### Calculate SSE, MSE & Residual statndard error (RSE)
+
+$SSE=\sum e_i^2$=$SSE=\sum((y_i-\hat y_i))^2)$   Sum of square due to residual
+
+$MSE=SSE/(n-2)$  ,where (n-2) is the degree of freedom as 2 degree of freedom get lost as we estimated from sample.
+
+$RSE=\sqrt(MSE)$
+ 
+```{r SSE,MSE,RSE}
+n=length(y)
+SSE=sum(e^2)
+MSE=SSE/(n-2)
+RSE=sqrt(MSE)
+RSE
+```
+
+### The standard error of $\hat\beta_0$ and $\hat\beta_1$
+
+$SE(\hat\beta_0)=\sqrt(MSE(\frac{1}{n}+\frac{\bar{x}^2}{S_{xx}})$
+
+$SE(\hat\beta_1)=\sqrt(\frac{MSE}{S_{xx}}$
+
+```{r standard error}
+SEb0=sqrt(MSE/Sxx)
+SEb1=sqrt(MSE*((1/n)+(xbar^2/Sxx)))
+c(SEb0,SEb1)
+
+```
+
+### Confidence Interval of $\hat\beta_0$ and $\hat\beta_1$
+
+$\hat\beta_0\pm t_(\alpha/2,n-2)*SE(\hat\beta_0))$
+
+$\hat\beta_1\pm t_(\alpha/2,n-2)*SE(\hat\beta_1))$
+
+```{r CI}
+cv=qt(p=0.975,df=198) 
+
+llb0=b0-cv*SEb0     #lower limit of CI for b0
+ulb0=b0+cv*SEb0     #upper limit of CI for b0
+cib0=c(llb0,ulb0)   # CI for b0
+cib0
+
+llb1=b1-cv*SEb1     #lower limit of CI for b1                 
+ulb1=b1+cv*SEb1    #upper limit of CI for b1
+cib1=c(llb1,ulb1)   # CI for b1
+cib1
+```
+
+ CI for $\beta_0$ is{7.027288,7.037899}
+ CI for $\beta_1$ is{-0.8553376,0.9504109}
+
+### Coefficient of Determinaton.
+
+$R^2=\frac{SSR}{TSS}=1-\frac{SSE}{TSS}$
+
+$TSS=\sum(y-\bar y)^2$
+
+```{r coeff of determination}
+TSS=sum((y-ybar)^2)
+Rsquared=1-(SSE/TSS)
+Rsquared 
+```
+### Scatter plot
+
+```{r}
+plot(y~x)
+abline(12.35141,0.0546931,untf = FALSE,lwd=3, col="dark red")
+
+```
+### Correlation coefficient
+
+Extent of correlation is explained by correlation coefficient.
+
+```{r}
+corl=cor(x,y)
+corl
+```
+### Using `lm()` function:
+
+```{r}
+m<-lm(y~x,data = advrt)
+summary(m)
+```
+
+
+### CONCLUSION:
+
+* Our model is:
+$SALES=\beta_0 +\beta_1 \times ADVERTISEMENT \ ON \ NEWSPAPER$
+
+ $SALES =12.35141 +0.0546931\times ADVERTISEMENT \ ON \ NEWSPAPER$
+
+* we find that form the above calculation and from `lm()` funtion we get the same value for the intercept and coeff. of  x or sales
+
+**Intercept**= 12.35141 & **Coeff. of advertisement on Newspaper**=0.0546931
+
+* From the estimated value of beta0 and beta1 we can conclude that if the advertisement on newspaper increases by 1unit then sales get increased by  0.0546931 unit.And if we don't advertise on newspaper then our sales will remain  12.35141.
+
+
+* From the **Scatter plot** we come to the conclusion that sales and advertisement on newspaper are correlated and they are positively correlated. the distance of the  points that are away from the fitted line are the errors.
+there are more lines away from the lines and the dots are apart which implies there is low correlation.
+
+* As they are correlated so the extent of correlation is explained by **coefficient of correlation** i.e corl=0.228299, which is nearly equal to 0 that implies that there is low correlation between advertisement of Newspaper and sales.
+
+* **p-value** is 0.001148 that is less than 0.05 so advertisement on Newspaper is significant so our null hypothesis is rejected i.e advertisement on Newspaper has no impact on sales but advertisement on newsaper has some effect on sales but it is low correlation coeff. is near to 0.
+
+* **Rsquared** =0.05212045 which means only 5.21% percent of the variability of sales is explained by advertisement on Newspaper.
+
+* **t value** can be calculated by dividing estimate by standard error (estimate/std.error)
+t value for x or advertisement on TV  is t_value= 3.30 
+
+* **RSE** Residual standard error tells us that the regression model predicts the sales with the average error of 5.09248.
+
+* From the **Confidence interval** we can interpret that we are 95% sure that the correlation between sales and advertisement on Newspaper is between   -1.170758 & 1.280145
+
+# LAB 2
+
+## Assingment 1
+
+### Install `wooldridge` package and use the data.
+
+We have to install the  `wooldridge` package by `install.packages("wooldridge")` then use the package by `require("wooldridge")/library("wooldridge")` 
+
+```{r}
+require(wooldridge)
+head(wage1)
+wage12<-wage1[1:7]
+head(wage12)
+```
+We have extracted first seven variables from __wage1__ and then stored the data in __wage12__.
+
+
+### Setting hypothesis
+
+   Null Hypothesis: \\
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ \
+
+  Alternative hypothesis: \\
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+$wage=\beta_0 +\beta_1 \times educ+\beta_2 \times exper+\beta_3 \times tenure+\beta_4 \times nonwhite+\beta_5 \times female+\beta_6 \times married +\epsilon_0$
+
+```{r}
+m1<-lm(wage~educ+exper+tenure+nonwhite+female+married , data = wage12)
+summary(m1)
+
+```
+* __36.09%__ of the variability is explained by this model and this model is significant for 6 & 519 degree of freedom and 5% level of significance but `exper` ,`nonwhite`& `married` are insignificant to this model.
+
+
+#### Plotting the graph
+
+```{r}
+pairs(wage12)
+```
+From the plot we can see that there is some relationship of wage with `educ`,`expr`,`tenure`.
+
+### Names of the variables
+```{r}
+names(wage12)
+```
+
+### Correlation matrix for `wage12` data
+
+```{r}
+cor(wage12)
+```
+there is no such high correlation among the variables.we can also check from the VIF
+
+### VIF for the given model
+
+```{r}
+vif(m1)
+
+```
+all the `VIF` values are not so high which implies that there is no multicolliniarity.
+
+### Female as a dummy variable.
+
+$wage=\beta_0 +\beta1 \times female+\epsilon_0$ \
+
+as it is a binary variable so for female model will be \
+
+$wage=\beta_0 +\beta_1 \times 1$ \
+
+for male\
+
+$wage=\beta_0+\beta_1 \times 0 \\i.e \\ wage=\beta_0$
+
+```{r}
+m2<-lm(wage~female,data = wage12)
+summary(m2)
+#female estimated wage =7.009-2.5118=4.4972
+```
+* As calculated F-statistic is greater than the tabulated F-statistic at 5% level of significance  and 1 & 524 degrees of freedom  (i.e 3.9201) so our model is significant.
+
+* The p-value for `female`  is less than 0.05 so `female` is significant to the model. 
+
+* From above calculation table we come to know that the `wage` of the `female` is estimated to be __4.4972__ and the `wage` of the `male` is estimated to be __7.0995__. `wage` of the `male` is higher than that of the `female`.
+
+*  __11.4%__ of the variability of `wage` is explained by the Model.
+
+### Nonwhite as a dummy variable 
+
+$wage=\beta_0 +\beta1 \times nonwhite+\epsilon_0$ \
+
+as it is a binary variable so for nonwhite model will be \
+
+$wage=\beta_0 +\beta_1 \times 1$ \
+
+for white \
+
+$wage=\beta_0+\beta_1 \times 0 \\i.e \\ wage=\beta_0$
+```{r}
+m6<-lm(wage~nonwhite,data = wage12)
+summary(m6)
+#estimated nonwhite wage =5.9442-0.4682=5.476
+```
+* As calculated F-statistic is greater than the tabulated F-statistic at 5% level of significance and 1 & 524 degrees of freedom  (i.e 3.9201 )so our model is insignificant.
+
+* The p-value of nonwhite  is greater than 0.05, so nonwhite  is insignificant to the model. 
+
+* From above calculation table we come to know that the wage of the nonwhite   is estimated to be __5.476__ and the wage of the white  is estimated to be __5.9442__ but as it is insignificant so we have to remove nonwhite from our model. wage of the white  is higher than that of the nonwhite .
+
+* Negative R squared implies insignificance of explanatory variables i.e `nonwhite` .
+
+
+### Married as a dummy variable 
+$wage=\beta_0 +\beta1 \times married+\epsilon_0$ \
+
+as it is a binary variable so for married model will be \
+
+$wage=\beta_0 +\beta_1 \times 1$ \
+
+for non-married \
+
+$wage=\beta_0+\beta_1 \times 0 \\i.e \\ wage=\beta_0$
+
+```{r}
+m7<-lm(wage~married,data = wage12)
+summary(m7)
+#total estimated married wage = 4.8439+1.7296=6.5735
+```
+* As calculated F-statistic is greater than the tabulated F-statistic at 5% level of significance  and 1 & 524 degrees of freedom  (i.e 3.9201) so our model is significant.
+
+* The p-value of married is less than 0.05 so married is significant to the model.
+
+* From above calculation table we come to know that the wage of the married  is estimated to be __6.5735__ and the wage of the non-married is estimated to be __4.8439__.wage of the non-married  is higher than that of the married.
+
+* __5%__ of the variability of wage is explained by the model.
+
+### forward selection
+
+#### 1. we add `exper` to the model
+
+$wage=\beta_0 +\beta_1 \times exper +\epsilon_0$
+
+```{r}
+f1<-lm(wage~exper,data = wage12)
+summary(f1)
+```
+* it is significant to the model as it's p-value is greater than 0.05
+
+* adjusted R-squared is __0.01086__ and RSE is __3.673__
+
+#### 2.  we add `educ` in 1
+
+$wage=\beta_0 +\beta_1 \times exper +\beta_2 \times educ+\epsilon_0$
+
+```{r}
+f2<-lm(wage~exper+educ,data = wage12)
+summary(f2)
+```
+* adjusted r squared get increased so it is significant as it becomes __0.2222__ and RSE get reduced __3.257__
+
+#### 3. we add `tenure` in 2
+$wage=\beta_0 +\beta_1 \times exper +\beta_2 \times educ +\beta_3 \times tenure+\epsilon_0$
+
+```{r}
+f3<-lm(wage~exper+educ+tenure,data = wage12)
+summary(f3)
+```
+* this model is significant as p-value is less than 0.05 but by the use of the `tenure` in the model `exper` get insignificant so we removed the tenure from our model.
+
+#### 4. we add `nonwhite` to our model
+
+$wage=\beta_0 +\beta_1 \times exper +\beta_2 \times educ +\beta_4 \times nonwhite+\epsilon_0$
+
+```{r}
+f4<-lm(wage~exper+educ+nonwhite,data = wage12)
+summary(f4)
+```
+* From the above table we find that model is significant as p-value is less than 0.05 .
+
+* But p-value of the `nonwhite` is greater than 0.05 so we remove `nonwhite` from our model.
+
+#### 5. we add`married` to our model
+
+$wage=\beta_0 +\beta_1 \times exper +\beta_2 \times educ  +\beta_5 \times married+\epsilon_0$
+
+```{r}
+f5<-lm(wage~exper+educ+married,data = wage12)
+summary(f5)
+```
+*From the above table we find that model is significant as p-value is less than 0.05 .
+
+*p-value of the `married` is less than 0.05 so it is significant to our model.
+
+*our adjusted R-squared get increased as it becomes __0.2357__ so this model is better than previous model in 2.  
+
+#### 6. we add `female` to our model
+
+$wage=\beta_0 +\beta_1 \times exper +\beta_2 \times educ  +\beta_5 \times married +\beta_6 \times female+\epsilon_0$
+
+
+```{r}
+f6<-lm(wage~exper+educ+married+female,data = wage12)
+summary(f6)
+```
+* From the above table we find that model is significant as p-value is less than 0.05 .
+
+* p-value of the `female` is less than 0.05 so it is significant to our model.
+
+* our adjusted R-squared get increased so this model is better than previous model in 5 i.e __0.3105__.
+
+* RSE is also less than that of model in 5  i.e __3.066__ so it is better model.
+
+## Assingment 2
+
+### Read the data.
+
+```{r}
+credit<-read.csv("credit.csv")
+head(credit)
+own<-factor(credit$Own,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+student<-factor(credit$Student,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+married<-factor(credit$Married,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+own[1:20]
+```
+
+### Plot  the graph
+
+```{r}
+plot(credit)
+```
+* From the above plot we found that balance has a linear relationship with income,limit,rating and age.
+
+### correlation matrix for `credit` data
+
+```{r}
+cor(credit[,-7:-10])
+```
+* There is high correlation among the variables i.e income & limit,income & rating ,limit & rating.
+* As balance is a response variable so there must be a correlation of the variables with them 
+
+
+### Setting hypothesis
+
+   Null Hypothesis: \\
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+ $VS$ \
+
+  Alternative hypothesis: \\
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+$Balance= \beta_0 + \beta_1 \times income+ \beta_2 \times limit +\beta_3 \times rating+\beta_4 \times cards +\beta_5 \times age +\beta_6 \times education+\beta_7 \times balance+ \epsilon_0$
+
+```{r}
+a2<-lm(Balance~Income+Limit+Rating+Cards+Age+Education+own+student+married, data = credit)
+summary(a2)
+```
+
+* From the above calculated table we came to know that our model is significant as our p-value is less than 0.05 
+
+* own and  married are  insignificant as their p-value is greater than 0.05 except them all the variables are significant. 
+
+```{r}
+a3<-lm(Balance~Income+Limit+Rating+Cards+Age+student, data = credit)
+summary(a2)
+```
+
+* This model is better than the previous model as in this case adjusted R-squared is greater than the previous one and RSE is minimum in this case.
+
+### `student` as a dummy variable
+
+
+$Balance= \beta_0 + \beta_1 \times student+ \epsilon_0$
+
+as it is a binary variable so for student, model will be \
+
+$Balance=\beta_0 +\beta_1 \times 1$ \
+
+for non-student \
+
+$Balance=\beta_0+\beta_1 \times 0 \\i.e \\ Balance=\beta_0$
+```{r}
+d1<-lm(Balance~student, data = credit)
+summary(d1)
+
+```
+* From the above table we found that our model is significant as our p-value is less than 0.05
+
+* balance of the student is 480.37+396.46 = __876.83__ and balance for non-student is __480.37__
+
+### `married` as a dummy variable
+
+$Balance= \beta_0 + \beta_1 \times married+ \epsilon_0$
+```{r}
+d2<-lm(Balance~married, data = credit)
+summary(d2)
+```
+* From the above calculated table we found that our model is insignificant as our p-value is greater than 0.05.
+
+### `own` as a dummy variable
+
+$Balance= \beta_0 + \beta_1 \times own+ \epsilon_0$
+
+as it is a binary variable so for own, model will be \
+
+$Balance=\beta_0 +\beta_1 \times 1$ \
+
+for non-own \
+
+$Balance=\beta_0+\beta_1 \times 0 \\i.e \\ Balance=\beta_0$
+
+```{r}
+d3<-lm(Balance~own, data = credit)
+summary(d3)
+```
+* From the above calculated we found that our model is in significant as it is greater than 0.05.
+
+
+## Assingment 3
+
+### read the data from excel to r
+
+```{r}
+chemical<-read.csv("ChemicalData.csv")
+head(chemical)
+names(chemical)
+```
+
+### plot the data
+```{r}
+plot(chemical)
+```
+
+### correlation matrix of the chemical data
+```{r}
+cor(chemical)
+```
+There is a correlation between `acidtemp` and `y` i.e __0.5709244__(57% correlation between acidtemp and y) ,`sulfideconc` and `y` i.e __0.3303949__ (33% correlation between sulfideconc and y) & `acidtemp` and `y` i.e __0.3098757__ (30% correlation between acidconc and y)
+
+
+### Setting hypothesis
+
+   Null Hypothesis: \\
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+ $VS$ \
+
+  Alternative hypothesis: \\
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+$y= \beta_0 +\beta_1 \times acidtemp +\beta_2 \times acidtemp +\beta_3 \times watertemp+ \beta_4 \times sulfideconc +\beta_5 \times amtofbleach+\epsilon_0$
+```{r}
+chem<-lm(y~.,data = chemical)
+summary(chem)
+```
+* from the above calculated table we can find that the model is significant as p-value is less than 0.05
+* p-value of intercept, watertemp,amtofbleach is greater than 0.05 so it is insignificant but rest of the variables acidtemp,acidconc,sulfideconc are significant.
+ 
+### removing `amtofbleach`
+```{r}
+chem1<-lm(y~acidtemp+acidconc+watertemp+sulfideconc, data = chemical)
+summary(chem1)
+
+```
+* From the above table we find that our model is significant but intercept and watertemp is insignificant to the model as their p-value is greater than 0.05.so we remove watertemp from our model.
+
+### removing `watertemp`
+```{r}
+
+chem2<-lm(y~acidtemp+acidconc+sulfideconc, data = chemical)
+summary(chem2)
+```
+* From the  calculated table we find that our model is significant and now our all the variables as well as intercept get significant as p-value is less than 0.05 .
+
+* Now our model is perfect fit. 
+
+
+# LAB 3
+
+## Assingment 1
+
+### Reading the data from excel.
+
+```{r}
+solubility<-read.csv("solubility.csv")
+head(solubility)
+```
+
+### Plotting the data
+
+```{r}
+plot(solubility)
+
+```
+
+* there is no linear relationship between the variables.
+* there is a quadratic relationship between the variables.
+
+### Model 1
+
+### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+```{r}
+sol<- lm(y~X1+X2+X3+I(X1^2),data = solubility)
+summary(sol)
+```
+
+* our model is significant but intercept,x1 and I(x1^2) is insignificant to the model.
+
+* __85.71%__ of variability of y is explained by the model.
+
+### Model 2
+
+#### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+```{r}
+sol3<- lm(y~X1+X2+X3+I(X1^2)+I(X2^2)+I(X3^2),data = solubility)
+summary(sol3)
+```
+* From the  above calculated table we find that our model is significant as the p value of the model is less than __0.05__ so our null hyothesis get rejected that other variables have no impact on the model.
+
+* __87.04%__ of variability of y is explained by the model.
+
+*  *t-statistic* for the parameter is 
+  
+ $\bullet$ for intercept \ $= \beta_0 /SE(\beta_0)$   which is equal to __-1.485__ and from the p-value we find that it is insignificant to our model.
+  
+ $\bullet$ for $X_1$ \  $= \beta_1 /SE(\beta_1)$ \ which is equal to __1.554__ and from the p-value we find that it is insignificant to our model.
+ 
+ $\bullet$ for $X_2$ \  $= \beta_2 /SE(\beta_2)$ \ which is equal to __0.474__ and from the p-value we find that it is insignificant to our model.
+
+ $\bullet$ for $X_3$ \ $= \beta_3 /SE(\beta_3)$ \ which is equal to __-3.233__ and from the p-value we find that it is significant to our model.
+
+$\bullet$ for $I(X_1^2)$ \ $= \beta_4 /SE(\beta_4)$ \ which is equal to __-1.289__ and from the p-value we find that it is insignificant to our model.
+
+ $\bullet$ for $I(X_2^2)$ \ $= \beta_5 /SE(\beta_5)$ \ which is equal to __0.199__ and from the p-value we find that it is insignificant to our model.
+ 
+ $\bullet$ for $I(X_3^2)$ \ $= \beta_6 /SE(\beta_6)$ \ which is equal to __0.734__ and from the p-value we find that it is insignificant to our model.
+ 
+* All the pameters except $X_3$ are insignificant so our model is not good fit or best fit.
+
+### Model 3
+
+#### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+```{r}
+sol3<- lm(y~X1+X3+I(X1^2)+I(X2^2)+I(X3^2),data = solubility)
+summary(sol3)
+```
+* From the  above calculated table we find that our model is significant as the p value of the model is less than __0.05__ so our null hyothesis get rejected that other variables have no impact on the model.
+
+* __87.54%__ of variability ofy is explained by the model.
+
+*  *t-statistic* for the parameter is 
+  
+ $\bullet$ for intercept \ $= \beta_0 /SE(\beta_0)$  which is equal to __-1.695__ and from the p-value we find that it is insignificant to our model.
+  
+ $\bullet$ for $X_1$  \ $= \beta_1 /SE(\beta_1)$  which is equal to __1.773__ and from the p-value we find that it is insignificant to our model.
+
+ $\bullet$ for $X_3$ \ $= \beta_3 /SE(\beta_3)$  which is equal to __-4.788__ and from the p-value we find that it is significant to our model.
+
+$\bullet$ for $I(X_1^2)$ \ $= \beta_4 /SE(\beta_4)$  which is equal to __-1.486__ and from the p-value we find that it is insignificant to our model.
+
+ $\bullet$ for $I(X_2^2)$ \ $= \beta_5 /SE(\beta_5)$ \ which is equal to __2.298__ and from the p-value we find that it is significant to our model.
+ 
+ $\bullet$ for $I(X_3^2)$ \ $= \beta_6 /SE(\beta_6)$ \ which is equal to __0.633__ and from the p-value we find that it is insignificant to our model.
+ 
+* it has the highest Adj R-sq and lowest RSE but most of the parameters are insignificant to the model.
+
+
+### Model 4
+#### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+```{r}
+sol4<- lm(y~X1+X3+I(X2^2),data = solubility)
+summary(sol4)
+```
+
+* From the  above calculated table we find that our model is significant as the p value of the model is less than __0.05__ so our null hyothesis get rejected that other variables have no impact on the model.
+
+* __87%__ of variability of y is explained by the model.
+
+*  *t-statistic* for the parameter is 
+  
+ $\bullet$ for intercept \ $= \beta_0 /SE(\beta_0)$  which is equal to __-2.292__ and from the p-value we find that it is significant to our model.
+  
+ $\bullet$ for $X_1$  \ $= \beta_1 /SE(\beta_1)$  which is equal to __5.564__ and from the p-value we find that it is significant to our model.
+
+ $\bullet$ for $X_3$ \ $= \beta_3 /SE(\beta_3)$ which is equal to __-7.156__ and from the p-value we find that it is significant to our model.
+
+ $\bullet$ for $I(X_2^2)$ \ $= \beta_5 /SE(\beta_5)$  which is equal to __3.205__ and from the p-value we find that it is significant to our model.
+ 
+* In this model all the parameters are significant and it has nearly the same Adj R-sq value as that of the highest Adj R-sq and lowest RSE and this is good as respect to the other models. 
+
+
+### Model 5
+
+#### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+```{r}
+sol5<- lm(y~X1+X2+X3+I(X1^2+X2^2+X3^2),data = solubility)
+summary(sol5)
+```
+* This model is also significant but two of the parameters are insignificant to our model.
+
+* __87.13%__ of variability ofy is explained by the model.
+
+### Correlation of the variables.
+
+```{r}
+cor(solubility)
+
+cor(solubility[c(-1,-4)])
+
+```
+* Observation number is not any necessary part for our model so we remove it.
+
+* From this table we can see that $X_3$ & $X_2$ have the highest correlation among themselves 
+
+* in second table there is a low correlation among the variables.
+
+
+
+### Extracting residuals and plotting them.
+
+#### residuals of Model 2
+we have extracted residuals from the second model and we  are plotting them
+
+```{r}
+e1=sol3$residuals
+plot(e1)
+```
+there is no any pattern shown in this scatter plot of residuals of model 2
+
+#### residual of the best fitted model
+
+we have extracted the residuals of model 4 and we are plotting them
+
+```{r}
+e2=sol4$residuals
+plot(e2)
+```
+
+
+## Assingment 2 & 3
+```{r}
+credit<-read.csv("credit.csv")
+head(credit)
+own<-factor(credit$Own,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+student<-factor(credit$Student,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+married<-factor(credit$Married,labels=c(0,1)) #transforming the (yes,no) values in (0 & 1) i.e integer
+
+```
+```{r}
+plot(credit)
+```
+
+### correlation matrix for `credit` data
+
+```{r}
+cor(credit[,-7:-10])
+```
+* There is high correlation among the variables i.e income & limit,income & rating ,limit & rating.
+* As balance is a response variable so there must be a correlation of the variables with them 
+
+
+### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+$Balance= \beta_0 + \beta_1 \times income+ \beta_2 \times limit +\beta_3 \times rating+\beta_4 \times cards +\beta_5 \times age +\beta_6 \times education+\beta_7 \times balance+ \epsilon_0$
+
+```{r}
+m1<-lm(Balance~Income+Limit+Rating+Cards+Age+Education+own+student+married, data = credit)
+summary(m1)
+```
+
+* From the above calculated table we came to know that our model is significant as our p-value is less than 0.05 
+
+* own and  married are  insignificant as their p-value is greater than 0.05 except them all the variables are significant. 
+
+### Setting hypothesis
+
+   Null Hypothesis: 
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: 
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+#### fit the model.
+
+
+$Balance= \beta_0 + \beta_1 \times income+ \beta_2 \times limit +\beta_3 \times rating+\beta_4 \times cards +\beta_5 \times age +\beta_7 \times balance+ \epsilon_0$
+```{r}
+m2<-lm(Balance~Income+Limit+Rating+Cards+Age+student, data = credit)
+
+summary(m2)
+```
+* our model is significant which implies that parameters has significant effect on the model
+
+* it has the improved adj R-sq and RSE so it is better than the previous one .
+
+* all the parametrs in this case becomes significant after the removal of the education variable from our model.
+
+### Durbin watson test for Autocorrelation of the variables
+
+#### Setting hypothesis
+
+   Null Hypothesis: 
+
+$H_0:\rho =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: 
+$H_1: \rho \ne 0$
+
+
+```{r}
+durbinWatsonTest(m2)
+
+```
+    \begin{center}         *OR* \end{center}
+```{r}
+e = m2$residuals
+n = length(e) #400
+h = numeric(n) 
+for(i in 2: n)
+{
+  h[i] = e[i] -e[i-1]
+}
+
+#h 
+d = sum(h^2)/sum(e^2)
+d
+
+
+
+```
+
+as our p-value is greater than 0.05 so we reject the null hypothesis which signifies that there is no autocorrelation among the error terms of the model.Residuals are not autocorrelated.
+
+### Correlation of the variables
+
+```{r}
+cor(credit[,c(1:6,11)])
+```
+* There is high correlation among the variables i.e income & limit,income & rating ,limit & rating.
+* As balance is a response variable so there must be a correlation of the variables with them 
+
+### VIF to check multicolliniarity.
+
+```{r}
+vif(m2)
+```
+multicolliniarity is present in this model as rating and limit has very high value of VIF. 
+
+### After removing Rating 
+
+as rating has highest VIF value so it cause huge impact on our model in sense of multicolliniarity
+
+#### Setting hypothesis
+
+   Null Hypothesis: \
+
+$H_0:\beta_1 = \beta_2 = \beta_3 \ \ \cdot\cdot\cdot \ \ =\beta_n =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: \
+$H_1: At \ least \ one \ of \ the \ \beta_i \ 's \ are \ not\ zero$
+
+##### fit the model.
+
+
+$Balance= \beta_0 + \beta_1 \times income+ \beta_2 \times limit +\beta_4 \times cards +\beta_5 \times age +\beta_7 \times balance+ \epsilon_0$
+
+```{r}
+m21<-lm(Balance~Income+Limit+Cards+Age+student, data = credit)
+summary(m21)
+```
+* In this model all the variables as well as intercept is significant but its Adj R-sq get reduced but it is nearly same to that in model after removing education. 
+
+#### VIF for
+```{r}
+vif(m21)
+```
+* VIF is not so high in this case ,hence multicolliniarity is not present.
+
+#### Correlation
+```{r}
+cor(credit[,c(1,2,4,5,6,11)])
+
+```
+* Correlation is high only in case of Income and limit but when we remove any of the variable our Adj R-sq value get reduced to large amount.so it is better.
+
+#### Durbin watson test for Autocorrelation of the variables
+##### Setting hypothesis
+
+   Null Hypothesis: 
+
+$H_0:\rho =0$
+
+\ $VS$ 
+
+  Alternative hypothesis: 
+$H_1: \rho \ne 0$
+
+
+```{r}
+durbinWatsonTest(m21)
+```
+* it nearly same as that of the previous one . Residuals are not autocorellted.
+
+# LAB-4
+
+## ASSINGMENT 1
+### Reading the data from excel
+
+```{r}
+household<-read.csv("household.csv")
+head(household)
+```
+
+
+```{r}
+dim(household) #dimension of the data household
+```
+### Plotting the graph
+
+```{r}
+attach(household)
+plot(Income)
+```
+### Fitting the logistic model
+
+```{r}
+logist = glm( Home..Ownership.Status~Income, data= household, family = binomial)
+summary(logist)
+```
+
+### Extracting the coefficient from model
+
+```{r}
+logist$coef
+```
+### predicting probablity
+
+predicting the probablity based on the logistic regression model .
+
+```{r}
+logit.prob = predict(logist, type = "response")
+logit.prob[1:20]
+```
+providing *no* to all the predicted values 
+
+```{r}
+logit.pred = rep("No", 20)
+```
+
+assigning *yes* to the probablities that are greater than 0.5
+
+```{r}
+logit.pred[logit.prob>0.5]= "Yes" #predicting probablity
+logit.pred
+```
+### Confusion matrix
+
+```{r}
+v=factor(logit.pred,labels = c(0,1))
+table(logit.pred,Home..Ownership.Status)
+```
+
+mean based on the confusion matrix table
+```{r}
+a=v==Home..Ownership.Status
+a
+mean(v==household$Home..Ownership.Status)
+
+#mean
+(7+7)/20 #logistic regression correctly predicted the movement of house ownership  70% of the time
+```
+
+### Use of simple linear regression model as the structure for linear predictor.
+
+$\eta = log(\frac{{\pi}}{1-{\pi}})$ where $\eta$ is a log of Odd's ratio(log-odd's)and is a liner predictor.  
+Transformation of $\eta = log(\frac{{\pi}}{1-{\pi}})$ is often called *logit transformation* of probablity.
+
+```{r}
+beta0=logist$coefficients[1]
+beta0
+beta1=logist$coefficients[2]
+beta1
+estvalue=beta0+beta1*Income
+
+```
+here `estvalue` is the estimated value obtained from the simple linear regression model and  is the linear predictor of the Home ownership status on the basis of income.
+
+
+### Deviance analysis
+
+```{r}
+residual=logist$deviance
+residual
+resid_df=logist$df.residual
+resid_df
+
+dev=22.435/18 # residual/df
+dev
+```
+deviance comes out to be *1.2463* as it is close to 1 so it is adequate .
+
+### Interpreting the parameter
+* $\beta_0$ is *-8.73951* and $\beta_1$ is *0.0002009* are the coefficients
+* $\beta_0$ is the intercept term and is negative which led to reduce the home ownership status to some extent.
+* $\beta_1$ is positive so House ownership status increases with the increase in Income
+
+
+### Adding Quadratic term to the model
+```{r}
+newmodel=glm(Home..Ownership.Status~Income+I(Income^2),family = binomial)
+summary(newmodel)
+```
+with the addition of the quadratic term in the model,our model becomes insignificant as all our p values becomes greater than __0.05__ .so it is not required to add a quadratic term to the model.
+
+
+## ASSINGMENGT 2
+
+### read the deafault data
+```{r}
+library(ISLR2)
+data("Default")
+head(Default)
+```
+### Plotting the data
+
+```{r}
+pairs(Default)
+```
+there is no linear relationship between any variables
+
+### Fitting the model
+
+```{r}
+mod= glm(default~student+balance+income,data = Default,family = binomial)
+summary(mod)
+```
+all the variables are significant excpt the `income` as its p-value is greater than 0.05 so we will remove it from our model.
+
+```{r}
+mod1= glm(default~student+balance,data = Default,family = binomial)
+summary(mod1)
+```
+its `AIC` value is less than the previous model so it is better than that model
+
+predicting the values for the `mod1`
+
+```{r}
+pred.mod=predict(mod1,type = "response")
+pred.mod[1:20]
+
+```
+
+
+assingning yes to the values having probablity greater than __0.5__ .
+
+```{r}
+pred.class=rep("No",10000) # assigning __no__ to all the probablities
+pred.class[pred.mod>0.5]="Yes"  # assigning __yes__ to the probablities greater than 0.5
+pred.class[1:20]
+
+```
+
+### confusion matrix
+```{r}
+
+default=Default$default
+table(pred.class,default)
+
+mean(pred.class==default)
+
+(9628+105)/10000 #logistic regression correctly predicted the movement of default data 97.33% of the time
+```
+
+
+#### Fitting the model using Validation Set Approach (or Train and Test data)
+
+dividing the data into test and and train data 
+```{r}
+balance <- Default$balance
+dat <- (income<40000)
+trainData <- Default[dat,]
+dim(trainData)
+testData <- Default[!dat,]
+dim(testData)   
+testDefault <- default[!dat]
+```
+
+##### fitting the model based on train and test data
+
+```{r}
+
+mod.fit = glm(default ~ student + balance,data = Default,family ='binomial',subset = dat) #fitting our train data 
+summary(mod.fit)
+mod.prob = predict(mod.fit,testData, type = 'response') #predicting probablities
+
+mod.pred = rep("No", 3497)
+mod.pred[mod.prob>0.5]= "Yes"  
+head(mod.pred)
+table(mod.pred, testDefault)
+mean(mod.pred == testDefault)
+mean(mod.pred != testDefault) 
+(3381+36)/3497 #logistic regression correctly predicted the movement of default data 97.71% of the time
+```
+previously the model has the accuracy of *0.9733* and in validation set approach accuracy has been increased *0.9771*.
+
+# LAB-5
+##  Assingment-1
+
+### Reading the data from excel
+
+```{r warning=FALSE}
+household<-read.csv("household.csv")
+head(household)
+```
+
+In R we will fit the model using `lda()` function, which is in the MASS library.
+Divide the data in the train and test set and calculate the `mse` .
+
+
+```{r}
+attach(household)
+train=(Income<50500)
+trainData=household[train,]
+testData=household[!train,]
+dim(trainData) #dimension of trainData
+dim(testData) #dimension of testData
+testOwnershipStatus=Home..Ownership.Status[!train]
+```
+
+
+### Fitting the LDA model
+we are fitting the LDA model using `lda()`
+
+#### random guessing
+
+```{r}
+require(MASS)
+
+ownership_status.fit_rguess<-lda(Home..Ownership.Status~Income,data = household)
+ownership_status.fit_rguess
+
+ownership_status.pred_rguess<-predict(ownership_status.fit_rguess,household)
+ownership_status.class_rguess=ownership_status.pred_rguess$class
+table(ownership_status.class_rguess,household$Home..Ownership.Status) #confusion matrix based on random guessing
+mean_rguess=mean(ownership_status.class_rguess==household$Home..Ownership.Status)  #mean based on random guessing
+mean_rguess
+```
+
+##### validation set approach
+
+```{r}
+require(MASS)
+ownership_status.fit<-lda(Home..Ownership.Status~Income,data = household,subset = train)
+ownership_status.fit
+
+```
+$\bullet$ The LDA output indicates that $\hat\pi_1$ =0.5714286 and $\hat\pi_2$ =0.4285714  ,there are 75%% of the training observation corresponding to the persons who doesn't have  the  Home ownership.
+
+$\bullet$ It also provides the group means,these are the average of each predictor within each class,and are used by LDA as estimates of $\mu_k$. This suggest that income have greater influence on the House ownership **(43416.67)** than the non house ownership **(40562.50)**.
+
+$\bullet$ The coefficient of linear discriminant output provides the linear combination of Income and Household that are used to form the LDA descision rule.  
+       **0.0002974743 $\times$ Income ** 
+       
+ this line represent the boundary between the house ownership and non house ownership.Home ownership will be predicted depending upon the which side of the line they are.
+
+
+### use the model to make predictions
+as we have fit the model using our training data, now we use it to make predictions on our test data . 
+
+```{r}
+ownership_status.pred<-predict(ownership_status.fit,testData)
+names(ownership_status.pred)
+ownership_status.class<-ownership_status.pred$class
+
+
+```
+it contain a list of three variables
+*Class*:the predicted class
+*posterior*:the posterior probability that an observation belong to each class
+*x*: the linear discriminant
+
+### Confusion matrix
+```{r}
+table(ownership_status.class,testOwnershipStatus) # confusion matrix
+
+```
+
+
+```{r}
+mean_vsa =mean(ownership_status.class==testOwnershipStatus)
+mean_vsa
+```
+it turns out that model  predicted the testOwnershipStatus  for 83.33% of the observation in our data correctly.
+
+
+Applying a 9% threshold to the posterior probabilities allow us to recreate the predictions contained in `ownership_status.pred$class`.
+
+```{r}
+sum(ownership_status.pred$posterior[,1]>=.09)
+sum(ownership_status.pred$posterior[,1]<.09)
+
+
+ownership_status.pred$posterior[1:6,1]
+ownership_status.class[1:6]
+
+```
+there are 2 persons those are the non house owners and  have their posterior probability greater than 9%. 
+
+
+if we wanted to use a posterior  probability threshold other than 50% in order to make prediction.
+```{r}
+sum(ownership_status.pred$posterior[,1]>.12)
+```
+No person meet that threshold which implies that there is no person that doesn't have the house ownership and has threshold greater than 12%.
+
+### Conclusion
+Mean_rguess(*70.00%*) of the Household ownership in case of validation set approach is grater than the Mean_vsa (*81.25%*) in case of validation set approach
+
+## Assingment 2
+
+Use default data  and divide  the data in train and test
+```{r}
+require(ISLR2)
+data("Default")
+attach(Default)
+head(Default)
+train=(income<40000)
+trainData=Default[train,]
+dim(trainData)
+testData=Default[!train,]
+dim(testData)
+testDefault=default[!train]
+```
+### fit the model using `lda()`
+
+fit the data using `lda()` function based on the train data.
+
+#### random guessing
+
+```{r}
+require(MASS)
+
+default_lda.fit_rguess<-lda(default~student+balance+income,data = Default)
+default_lda.fit_rguess
+
+default_lda.pred_rguess<-predict(default_lda.fit_rguess,Default)
+default_lda.class_rguess=default_lda.pred_rguess$class
+table(default_lda.class_rguess,default) #confusion matrix based on random guessing
+mean_rguess=mean(default_lda.class_rguess==default)  #mean based on random guessing
+mean_rguess
+
+```
+
+#### validation set approach
+```{r}
+
+default_lda.fit<-lda(default~student+balance+income,data = Default,subset = train)
+default_lda.fit
+
+```
+
+$\bullet$ The LDA output indicates that $\hat\pi_1$ =0.96493926  and $\hat\pi_2$ =0.03506074   ,there are 96.49% of the training observation corresponding to the persons who doesn't have been defaulted by debt.
+
+$\bullet$ It also provides the group means,these are the average of each predictor within each class,and are used by LDA as estimates of $\mu_k$. This suggest that student have greater influence on the the customer defaulted on their debt **(0.5570175)** than the non student **(0.4489243)** similarly  balance   has greater influence on the defaulter **(1771.1333)** than the non defaulter **(834.8563)** but in case of the income it is opposite  as greater income **(25730.68)** are not the defaulter but slightly low income **(24409.13)**  are the defaulter
+
+$\bullet$ The coefficient of linear discriminant output provides the linear combination of studentYes ,balance and income that are used to form the LDA descision rule.  
+** -2.019107e-01 $\times$ studentYes + 2.235850e-03 $\times$ balance + 3.352984e-06 $\times$
+income **
+ this plane represent the boundary between the deafault and non dafault.default will be predicted depending upon the which side of the line they are.
+
+
+### predicting the values
+
+predict the values based on the test data 
+```{r}
+default_lda.pred<-predict(default_lda.fit,testData)
+names(default_lda.pred)
+```
+it contain a list of three variables
+*Class*:the predicted class
+*posterior*:the posterior probability that an observation belong to each class
+*x*: the linear discriminant
+
+### confusion matrix
+
+```{r}
+default_lda.class=default_lda.pred$class
+table(default_lda.class,testDefault)
+```
+
+```{r}
+
+mean_vsa=mean(default_lda.class==testDefault)
+mean_vsa
+```
+
+
+Applying a 50% threshold to the posterior probabilities allow us to recreate the predictions contained in `default_lda.pred$class`.
+```{r}
+sum(default_lda.pred$posterior[,1]>=0.5)
+
+sum(default_lda.pred$posterior[,1]<0.5)
+
+```
+there are 3464 persons that are defaulted by debt having the posterior probability greater than the threshold of 50% and there are 33 persons that are defaulted by debt having posterior probability less than than the threshold of 50%.
+
+
+```{r}
+default_lda.pred$posterior[1:20,1]
+default_lda.class[1:20]
+sum(default_lda.pred$posterior[,1]>.99)
+```
+there are 2264 persons that are defaulted that have the posterior probability greater than the 99% threshold .
+
+### comparision between both the result
+In case of random guessing data the mean was **0.9724** but in case of validation set approach mean is **0.9754075** validation set approach data has the higher mean as compared to the data based on the random guessing.
+
+
+# LAB-6
+
+##  QDA-Quadratic Discriminant Analysis
+
+### fiting the model using `qda()` 
+
+#### random guessing
+
+```{r}
+require(MASS)
+data("Default")
+
+default_qda.fit_rguess<-qda(default~student+balance+income,data = Default)
+default_qda.fit_rguess
+
+default_qda.pred_rguess<-predict(default_qda.fit_rguess,Default)
+default_qda.class_rguess=default_qda.pred_rguess$class
+table(default_qda.class_rguess,default) #confusion matrix based on random guessing
+mean_rguess=mean(default_qda.class_rguess==default)  #mean based on random guessing
+mean_rguess
+
+```
+
+#### validation set approach
+```{r}
+default_qda.fit<-qda(default~.,data=Default,subset = train)
+default_qda.fit
+```
+ the output returns  the posterior probabilities and group means as LDA, except the linear discriminant because the QDA classifier involves a quadratic, rather than a linear, function of the predictors.
+ 
+### predicting the data 
+```{r}
+default_qda.pred<-predict(default_qda.fit,testData)
+default_qda.class<-default_qda.pred$class
+table(default_qda.class,testDefault) # confusion matrix
+mean_vsa=mean(default_qda.class==testDefault) #mean
+```
+the QDA  mean_vsa  **0.9734** in case of the validation set approach but in case of the random guessing the mean_rguess is **0.973**  . it has lower mean than the  mean_rguess of LDA **0.9754075**
+
+
+# LAB-7
+## Naive Bayes
+
+### fit the model using `naiveBayes()`
+
+```{r warning=FALSE}
+library(e1071)
+library(naivebayes)
+
+data("Default")
+
+default_naive.fit_rguess<-naive_bayes(default~student+balance+income,data = Default)
+default_naive.fit_rguess
+
+default_naive.pred_rguess<-predict(default_naive.fit_rguess,Default)
+
+default_naive.class_rguess=default_naive.pred_rguess #as it gives only values in YES and NO
+
+table(default_naive.class_rguess,default) #confusion matrix based on random guessing
+
+mean_rguess=mean(default_naive.class_rguess==default)  #mean based on random guessing
+mean_rguess
+
+```
+
+#### validation set approach
+```{r}
+
+default_nb.fit<-naive_bayes(default~.,data= Default,subset = train)
+default_nb.fit
+```
+the output contains the estimated mean and standard deviation  for each variable in the group. Mean of the income is 25730.680  for  no default and standard deviation is 8878.337 
+ similarly mean of the balance is 834.8563  for  no default and standard deviation is 460.1149
+
+### finding mean and standard deviation  for balance
+```{r}
+mean(balance[train][default[train]=="No"])
+sd(balance[train][default[train]=="No"])
+```
+
+### predicting the values based on the test data
+```{r warning=FALSE}
+default_nb.pred<-predict(default_nb.fit,testData)
+table(default_nb.pred,testDefault) #confusion matrix
+mean(default_nb.pred==testDefault) #mean
+```
+ Naive Bayes performs very well with accurate predictions over 97.05% of the time ,This is slightly worse than the QDA (*97.34%*) and LDA (*97.54*).
+
+
+
+
+
+
+

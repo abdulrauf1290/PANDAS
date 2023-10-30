@@ -1,0 +1,175 @@
+---
+title: "MULYIPLE LINEAR REGRESSION MODEL"
+author: "Mohammed Swaned M"
+date: "2022-12-05"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Name         : Mohammed Swaned M
+
+Enrollment_no: GN4994
+
+Faculty_no   : 22DSMSA104
+
+
+
+
+
+# Multiple Linear Regression Model
+## Introduction
+
+The Multiple linear regression model is defined as
+$y=\beta_0+\beta_1 \times X_1 +\cdot\cdot\cdot + \beta_pX_p +\epsilon$ 
+
+Now we consider the wage12 data and the multiple linear regression model for that data is given as
+
+$wage=\beta_0+\beta_1\times education +\beta_2\times tenure +\beta_3\times nonwhite + \beta_4\times female +\beta_5 \times married +\epsilon$
+
+Now read data
+
+```{r}
+credit=read.csv("credit.csv")
+head(credit)
+credit1=credit[c(-7,-8,-9,-10)]
+credit1
+```
+## Make the scatter plot
+```{r}
+pairs(credit1)
+```
+From the above plot, we may see that there is a linear relationship between TV and sales, radio``andsales’ and newspaper and sales. To figure out more we obtain the correlation coefficient among the
+variables.
+
+## Calculate the correlation coefficient
+```{r}
+cor(credit1)
+```
+## Fitting of multiple Linear Regression Model
+To estimate the coefficients of the variables TV, radio and newspaper, we fit the following model
+```{r}
+M1=lm(Balance~., data = credit)
+summary(M1)
+```
+## Checking Significance of Model
+To check the significance of the model, we check F statistic and for that we set the hypotheses as follows:
+
+Null Hypothesis:$H_0 : \beta_1 = \beta_2 =\cdot\cdot\cdot = \beta_k = 0$
+
+Alternative Hypothesis:$H_1 : At least \:one \:\beta_i \neq 0, i = 1, 2, \cdot\cdot\cdot , k$.
+
+F-statistic: 750.3 on 11 and 388 DF, p-value: $< 2.2e-16$ Since the F statistic is 750.3 on 11 and 388 df with p-value < 2.2e-16 i.e. almost zero. Hence we *reject the null hypothesis* that means there is at least one$\beta_i$ that is not equal to zero. Therefore, our model is significant.
+
+## Checking Significance of Variables
+To check the significance of variable(s), we check the $t-ratios$ and its corresponding $p-values$. We set the hypotheses as follows:
+$H_0 : \beta_i = 0\:\: Vs \ H_1 : \beta_i \neq 0\: where \:i = 0, 1, 2, 3$ 
+Now we check the t-statistics and p value of the corresponding variables one by one and decide that which
+one is significant. SO the p-value for *intercept* term is $2\times10^{-16}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_0 \neq 0$.
+The p-value of *Income* is  $2\times10^{-16}$that is almost zero, hence we reject the null hypothesis and accept that $\beta_1 \neq 0$
+The p-value of *Limit* is $1.21\times10^{-8}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_3 \neq 0$.
+The p-value of *Rating* is $0.0211$ that is  less than 0.05, hence we reject the null hypothesis and accept that $\beta_5 \neq 0$.
+The p-value of *Cards* is $5.40\times10^{-5}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_5 \neq 0$.
+The p-value of *Age* is $0.034$ that is less than 0.05, hence we reject the null hypothesis and accept that $\beta_5 \neq 0$.
+The p-value of *Student* is $2\times10^{-16}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_5 \neq 0$.
+The p-value of *Education* is 0.4921 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_3 = 0$.
+The p-value of *Own* is 0.2832 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_2 = 0$.
+The p-value of *Married* is 0.4107 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_6 = 0$.
+The p-value of *Region* is 0.4083 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_6 = 0$.
+This means that the variables *Education,Own,Married and Region*is not significant in this model.
+Since these variables is not significant, so we remove these  variable from the model.
+Hence our final model is:
+$Balance = \beta_0 + \beta_1 \times Income+ \beta_2\times Limit + \beta_3 \times Ratings + \beta_4 \times Cards + \beta_5 \times Age + \beta_8 \times Student + \epsilon$
+
+```{r}
+M2=lm(Balance~Income+Limit+Rating+Cards+Age+Student,data=credit)
+summary(M2)
+```
+## Adequacy of Model
+### Residual Standerd Error
+
+$RSE=\sqrt(\frac{RSS}{n-p-1})$
+
+where $RSS=\sqrt(\sum_{i=1}^{n}(y_i -\hat y_i)^2$ and is called residual sum of squares(RSS)
+```{r}
+Balance=credit$Balance
+Income=credit$Income
+Limit=credit$Limit
+Rating=credit$Rating
+Cards=credit$Cards
+Age=credit$Age
+Balancehat=M2$coefficients[1]*Income+M2$coefficients[2]*Limit+M2$coefficients[3]*Rating+M2$coefficients[4]*Cards+M2$coefficients[5]*Age
+#alternaively
+resid=M2$residuals
+rss=sum(resid^2)
+rss
+n=length(credit$Income)
+p=5
+rse=sqrt(rss/n-p-1)
+rse
+```
+Now Calculate RSE from the rectified model
+
+```{r}
+resid2=M2$residuals
+rss2=sum(resid2^2)
+rss2
+p=5
+rse2=sqrt(rss/n-p-1)
+rse2
+```
+### R Squared
+
+Multiple R-squared: 0.9551, Adjusted R-squared: 0.9538. The reported R squared is 0.9551 that is approximately 0.95. So we see that 95% variability of Balance is explained by Income, Limit, Rating, Cards, Age,Education,Own,Student,Married and Region and the adjusted
+R- squared is 0.9538 when insignificant variables(Education,Own,Married and Region ) is attached.
+After omitting these insignificant variables from the model and we examine the R-squared and adjusted R squared. They are as follows:
+Multiple R-squared: 0.9547, Adjusted R-squared: 0.954.We find that there is no difference in R squared but adjusted R-squared has increased a little bit. That is theevidence that if we remove any insignificant variable from the model, them adjusted R-squared increased.
+
+## Dummy Variable
+### Studnt as dummy variable
+ Here we model the data as follows: 
+ $Balance =\beta_0+\beta_1\times Student$
+ 
+```{r}
+M3=lm(Balance~Student,data = credit)
+summary(M3)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Balance=480.37+396.46 \times Student$
+
+However, we notice that the p-value for the dummy variable that is $1.488\times 10^{-7}$. This means that the variable *Student* is significant.
+
+### Married as dummy variable
+Here we model the data as follows: 
+ $Balance=\beta_0+\beta_1\times Married$
+ 
+```{r}
+M4=lm(Balance~Married,data = credit)
+summary(M4)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Balance=523.290-5.347\times Married$
+However, we notice that the p-value for the dummy variable is high that is $0.9099$ This means that the variable *Married* is insignificant.
+### Own as dummy variable
+Here we model the data as follows: 
+ $Balance=\beta_0+\beta_1\times Own$
+ 
+```{r}
+M5=lm(Balance~Own,data = credit)
+summary(M5)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Balance=509.80+19.73\times Own$
+However, we notice that the p-value for the dummy variable is high that is$0.6685$ This means that the variable *Own* is insignificant.
+
+### Region as dummy variable
+Here we model the data as follows: 
+ $Balance=\beta_0+\beta_1\times Region$
+ 
+```{r}
+M6=lm(Balance~Region,data = credit)
+summary(M6)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Balance=531-12.50\times RegionSouth-18.69\times RegionWest$
+However, we notice that the p-value for the dummy variable is high that is$0.9575$ This means that the variable *Region* is insignificant.

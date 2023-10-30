@@ -1,0 +1,91 @@
+---
+title: "lab_11-BOOTSTRAP"
+author: "Vaishnavi singh"
+date: "JAN 11,23"
+output:
+  pdf_document: default
+  html_document: default
+---
+\pagenumbering{roman}
+\newpage
+\pagenumbering{arabic}
+
+
+
+# ASSIGNMENT 1 
+
+## Reading the data
+```{r}
+Data<-read.csv("Advertising.csv")
+head(Data)
+names(Data)
+
+```
+## Fitting the MLR model
+```{r}
+M1<-lm(sales~TV+radio+newspaper,data=Data)
+summary(M1)
+```
+For this model,model adequacy is 89.56% but two variables are non significant.Thus,this model is not good fit.
+```{r}
+M2<-lm(sales~TV+radio,data=Data)
+summary(M2)
+```
+Since for this model,coefficient of determination is 89.62% with all variables to be significant.Thus,this model is good fit. 
+
+
+
+```{r}
+library(boot)
+```
+
+```{r}
+boot.fn<-function(Data,index)
+  coef(lm(sales~TV+radio,data=Data,subset=index))
+boot.fn(Data,sample(200,200,replace=TRUE))
+
+set.seed(19)
+boot(Data,boot.fn,R=200)
+
+```
+This indicates that the bootstrap estimates for $$SE(\hat\beta_0)=0.3255$$,
+$$SE(\hat\beta_1)=0.0019$$ and $$SE(\hat\beta_2)=0.0098$$
+\newpage
+
+# ASSIGNMENT 2 
+
+## Reading the data
+```{r}
+Data<-read.csv("Datachemical.csv")
+names(Data)
+head(Data)
+```
+
+## Fitting the model
+```{r}
+M1<-lm(y~.,data=Data)
+summary(M1)
+```
+
+This model explains only 47.71% variability and two variables are non significant for the model.Hence,this model is not good fit.
+```{r}
+M2<-lm(y~acidconc+acidtemp+sulfideconc,data=Data)
+summary(M2)
+```
+This model is better as it explains 46.72% variability with all variables significant.
+
+```{r}
+boot.fn<-function(Data,index)
+  coef(lm(y~acidconc+acidtemp+sulfideconc,data=Data,subset=index))
+boot.fn(Data,sample(200,200,replace=TRUE))
+
+set.seed(19)
+boot(Data,boot.fn,R=200)
+
+```
+This indicates that the bootstrap estimates for 
+$$SE(\hat\beta_0)=10.96$$,
+$$SE(\hat\beta_1)=8.2514$$,
+$$SE(\hat\beta_2)=0.2082$$ and
+$$SE(\hat\beta_3)=30.9324$$ .
+

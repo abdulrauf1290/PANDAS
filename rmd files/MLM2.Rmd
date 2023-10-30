@@ -1,0 +1,174 @@
+---
+title: "MULTIPLE LINEAR REFRESSION MODEL"
+author: "Mohammed Swaned M"
+date: "05-12-2022"
+output:
+  pdf_document: default
+  word_document: default
+  html_document: default
+---
+\tableofcontents
+\newpage
+
+
+Name         : Mohammed Swaned M
+
+Enrollment_no: GN4994
+
+Faculty_no   : 22DSMSA104
+
+
+
+
+
+# Multiple Linear Regression Model
+## Introduction
+
+The Multiple linear regression model is defined as
+$y=\beta_0+\beta_1 \times X_1 +\cdot\cdot\cdot + \beta_pX_p +\epsilon$ 
+
+Now we consider the wage12 data and the multiple linear regression model for that data is given as
+
+$wage=\beta_0+\beta_1\times education +\beta_2\times tenure +\beta_3\times nonwhite + \beta_4\times female +\beta_5 \times married +\epsilon$
+
+Now read data
+
+```{r warning=FALSE}
+wage12<-wooldridge::wage1[c(1,2,3,4,5,6,7)]
+head(wage12)
+```
+## Make the scatter plot
+```{r warning=FALSE}
+pairs(wage12)
+```
+From the above plot, we may see that there is a linear relationship between TV and sales, radio``andsales’ and newspaper and sales. To figure out more we obtain the correlation coefficient among the
+variables.
+
+## Calculate the correlation coefficient
+```{r warning=FALSE}
+cor(wage12)
+```
+## Fitting of multiple Linear Regression Model
+To estimate the coefficients of the variables educ,exper,tenure,nonwhite,female and married, we fit the following model
+```{r warning=FALSE}
+M1=lm(wage~educ+exper+tenure+nonwhite+female+married, data = wage12)
+summary(M1)
+```
+## Checking Significance of Model
+To check the significance of the model, we check F statistic and for that we set the hypotheses as follows:
+Null Hypothesis: $H_0 : \beta_1 = \beta_2 =\cdot\cdot\cdot = \beta_k = 0$
+
+Alternative Hypothesis: $H_1 : At least \:one \:\beta_i \neq 0, i = 1, 2, \cdot\cdot\cdot , k$.
+F-statistic: 50.41 on 6 and 519 DF, p-value: $< 2.2e-16$ Since the F statistic is 50.41 on 6 and 519 df with p-value < 2.2e-16 i.e. almost zero. Hence we *reject the null hypothesis* that means there is at least one$\beta_i$ that is not equal to zero. Therefore, our model is significant.
+
+## Checking Significance of Variables
+To check the significance of variable(s), we check the $t-ratios$ and its corresponding $p-values$. We set the hypotheses as follows:
+$H_0 : \beta_i = 0\:\: Vs \space H_1 : \beta_i \neq 0\: where \:i = 0, 1, 2, 3$ 
+Now we check the t-statistics and p value of the corresponding variables one by one and decide that which
+one is significant. SO the p-value for *intercept* term is .0289 that is almost zero, hence we reject the null hypothesis and accept that $\beta_0 \neq 0$.
+The p-value of *Education* is  $2\times10^{-16}$that is almost zero, hence we reject the null hypothesis and accept that $\beta_1 \neq 0$
+The p-value of *Tenure* is $1.29\times10^{-10}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_3 \neq 0$.
+The p-value of *Female* is $1.57\times10^{-10}$ that is almost zero, hence we reject the null hypothesis and accept that $\beta_5 \neq 0$.
+The p-value of *Experience* is 0.1201 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_3 = 0$.
+The p-value of *Nonwhite* is 0.8775 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_2 = 0$.
+The p-value of *married* is 0.0525 that is greater than 0.05, hence we fail to reject the null hypothesis and accept that $\beta_6 = 0$.
+This means that the variables *Experience,Nonwhite and Married*is not significant in this model.
+Since these variables is not significant, so we remove these  variable from the model.
+Hence our final model is:
+$wage= \beta_0 + \beta_1 \times education + \beta_3\times tenure + \beta_5 \times female + \epsilon$
+```{r warning=FALSE}
+M2=lm(wage~educ+tenure+female,data=wage12)
+summary(M2)
+```
+Here,The p-value of *intercept* is 0.193  that is greater than 0.05, hence we fail to reject the null h*ypothesis and accept that $\beta_0= 0$.
+since *intercept* is not significant,so we remove the variable from the model
+Hence our final model is:
+$wage=  \beta_1 \times education + \beta_3\times tenure + \beta_5 \times female + \epsilon$
+
+```{r warning=FALSE}
+M3=lm(wage~educ+tenure+female-1,data=wage12)
+summary(M3)
+```
+## Adequacy of Model
+### Residual Standerd Error
+
+$RSE=\sqrt(\frac{RSS}{n-p-1})$
+
+where $RSS=\sqrt(\sum_{i=1}^{n}(y_i -\hat y_i)^2$ and is called residual sum of squares(RSS)
+```{r warning=FALSE}
+wage=wage12$wage
+educ=wage12$educ
+tenure=wage12$tenure
+female=wage12$female
+wagehat=M3$coefficients[1]*educ+M3$coefficients[2]*tenure+M3$coefficients[3]*female
+#alternaively
+wagehat2=M3$fitted.values
+residManual=wage-wagehat
+rssMan=sum(residManual^2)
+rssMan  
+n=length(educ)
+p=3
+rseman=sqrt(rssMan/n-p-1)
+rseman
+resid=M3$residuals
+rss=sum(resid^2)
+rss
+n=length(wage12$educ)
+p=3
+rse=sqrt(rss/n-p-1)
+rse
+```
+Now Calculate RSE from the rectified model
+
+```{r warning=FALSE}
+resid2=M3$residuals
+rss2=sum(resid2^2)
+rss2
+p=3
+rse2=sqrt(rss/n-p-1)
+rse2
+```
+### R Squared
+
+Multiple R-squared: 0.3682, Adjusted R-squared: 0.3609. The reported R squared is 0.3682 that is approximately 0.37. So we see that 37% variability of wage is explained by education, experience, tenure,nonwhite,female and married and the adjusted
+R- squared is 0.8956 when insignificant variables (experience,nonwhite and married) is attached.
+After omitting these insignificant variables from the model and we examine the R-squared and
+adjusted R squared. They are as follows:
+Multiple R-squared: 0.3577, Adjusted R-squared: 0.3544.Here the intercept is not a significant variable .After ommitting the insignificant variables from the variables and we examine the R-squared and adjusted R-squared.They are as follows:
+Multiple R-squared: 0.8187, Adjusted R-squared: 0.8176.We find that there is no difference in R squared but adjusted R-squared has increased a little bit. That is theevidence that if we remove any insignificant variable from the model, them adjusted R-squared increased.
+
+## Dummy Variable
+### Female as dummy variable
+ Here we model the data as follows: 
+ $Wage=\beta_0+\beta_1\times female$
+ 
+```{r warning=FALSE}
+M4=lm(wage~female,data = wage12)
+summary(M4)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Wage=7.0995-2.5118\times female$
+However, we notice that the p-value for the dummy variable that is $1.042\times 10^{-15}$. This means that the variable *female* is significant.
+
+### Nonwhite as dummy variable
+Here we model the data as follows: 
+ $Wage=\beta_0+\beta_1\times nonwhite$
+ 
+```{r warning=FALSE}
+M5=lm(wage~nonwhite,data = wage12)
+summary(M5)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Wage=5.9442-0.4682\times nonwhite$
+However, we notice that the p-value for the dummy variable is high that is $0.378$ This means that the variable *nonwhite* is insignificant.
+### Married as dummy variable
+Here we model the data as follows: 
+ $Wage=\beta_0+\beta_1\times married$
+ 
+```{r warning=FALSE}
+M6=lm(wage~married,data = wage12)
+summary(M6)
+```
+Table displays the coefficient estimates and other information associated with the model. So the  Model of the data as follows:
+$Wage=4.8439+1.7296\times married$
+However, we notice that the p-value for the dummy variable is $1.12\times10^{-7}$ This means that the variable *married* is significant.

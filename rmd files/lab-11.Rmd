@@ -1,0 +1,149 @@
+---
+title: "Assingment 11"
+author: "ABDUL RAUF"
+date: "2023-01-19"
+output: html_document
+---
+
+\begin{center} * LAB - 11 * \end{center}
+\newpage
+
+                        __NAME__:-**ABDUL RAUF**
+                        __ENRL NO__:-**GL6092** 
+                        __ROLL NO__:-**22DSMSA116**    
+
+
+
+
+# Assingment 1
+
+## Read the data from excel
+
+
+```{r}
+advert<-read.csv("Advertising.csv")
+head(advert)
+names(advert)
+attach(advert)
+pairs(advert)
+dim(advert)
+```
+
+## Fitting the model 
+
+```{r}
+m1<-lm(sales~TV+radio+newspaper,data = advert)
+m1
+summary(m1)
+AIC(m1)
+```
+
+$\bullet$ Except Newspaper all the variables are significant as their p- values are less than **0.05** .
+
+$\bullet$ 89.56% of the variability of sales is explained by the model.
+
+
+
+```{r}
+m2<-lm(sales~TV+radio,data = advert)
+m2
+summary(m2)
+AIC(m2)
+```
+
+$\bullet$ 89.62% of the variability of sales is explained by the model.
+
+$\bullet$ m2 has the lowest AIC value and in this model all the variables are significant.
+
+$\bullet$ adjusted R sq and MSE of m2 have approximately same value as compared to the m1 so m2 is better as compared to model m1.
+
+## Bootstraping
+
+```{r}
+library(boot)
+set.seed(1)
+advert.fn<-function(advert,index)
+  coef(lm(sales~TV+radio,data=advert,subset=index))
+advrt.obj<-boot(data = advert,statistic = advert.fn ,R=200)
+advrt.obj
+
+```
+Estimates of parameters are as follows:-
+
+$\bullet$ $SE(\hat{\beta_0})$ = **0.3133033**
+
+$\bullet$ $SE(\hat{\beta_1})$ = **0.002003**
+
+$\bullet$ $SE(\hat{\beta_2})$ = **0.010484**
+
+Estimates of the bais of the parameter are as follows:-
+
+$\bullet$ $Bais(\hat{\beta_0})$ = **-4.812417e-03**
+
+$\bullet$ $Bais(\hat{\beta_1})$ = **7.985856e-05 **
+
+$\bullet$ $Bais(\hat{\beta_2})$ = **-9.421676e-05**
+
+
+
+# Assingment 2
+
+## Read the data from excel
+
+```{r}
+sol<-read.csv("solubility.csv")
+head(sol)
+names(sol)
+attach(sol)
+pairs(sol)
+dim(sol)
+```
+
+## Fitting the model
+
+```{r}
+M1<-lm(y~X1+X2+X3,data = sol)
+M1
+summary(M1)
+AIC(M1)
+``` 
+$\bullet$ 84.86% of the variability of y is explained by the model. and all the variables are significant.
+
+## Bootstraping
+
+```{r}
+library(boot)
+set.seed(1)
+sol.fn<-function(sol,index)
+  coef(lm(y~X1+X2+X3,data=sol,subset=index))
+sol.obj<-boot(data = sol,statistic = sol.fn ,R=200)
+sol.obj
+
+```
+
+
+Estimates of parameters are as follows:-
+
+$\bullet$ $SE(\hat{\beta_0})$ = **0.187210926**
+
+$\bullet$ $SE(\hat{\beta_1})$ = **0.018998236**
+
+$\bullet$ $SE(\hat{\beta_2})$ = **0.010711207**
+
+$\bullet$ $SE(\hat{\beta_3})$ = **0.006702752**
+
+
+Estimates of the bais of the parameter are as follows:-
+
+$\bullet$ $Bais(\hat{\beta_0})$ = **0.0401583977**
+
+$\bullet$ $Bais(\hat{\beta_1})$ = **-0.0034272314 **
+
+$\bullet$ $Bais(\hat{\beta_2})$ = **-0.0005539604**
+
+$\bullet$ $Bais(\hat{\beta_2})$ = **-0.0022745225**
+
+
+
+
+

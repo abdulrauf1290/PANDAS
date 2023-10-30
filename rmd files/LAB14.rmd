@@ -1,0 +1,99 @@
+---
+title: "LAB 14"
+author: "ABDUL RAUF"
+date: "2023-02-05"
+output: html_document
+---
+
+\newpage
+
+                        __NAME__:-**ABDUL RAUF** \
+                        __ENRL NO__:-**GL6092** \
+                        __ROLL NO__:-**22DSMSA116** \   
+
+
+# LASSO REGRESSION:
+
+Lasso (least absolute shrinkage and selection operator; also Lasso or LASSO) is a regression analysis method that performs both variable selection and regularization in order to enhance the prediction accuracy and interpretability of the resulting statistical model
+
+To perform lasso regression, we’ll use functions from the `glmnet()` package. This package requires the response variable to be a vector and the set of predictor variables to be of the class data.matrix.
+
+use the `glmnet()` function to fit the ridge regression model and specify alpha=1.
+
+Note that setting alpha equal to 0 is equivalent to using ridge regression and setting alpha to some value between 0 and 1 is equivalent to using an elastic net. 
+
+To determine what value to use for lambda, we’ll perform k-fold cross-validation and identify the lambda value that produces the lowest test mean squared error (MSE).
+`cv.glmnet()` automatically performs k-fold cross validation using k = 10 folds.
+
+
+# Load the Data
+
+``` {r ,warning=FALSE}
+library(glmnet)
+library(ISLR2)
+
+#Define predictor and response variables
+y <- mtcars$hp
+x <- data.matrix(mtcars[, c('mpg', 'wt', 'drat', 'qsec')])
+```
+
+# Fit the ridge regression model
+```{r}
+model <- glmnet(x, y, alpha = 1)
+summary(model)
+
+```
+
+# Fit lasso regression model using k-fold cross-validation
+``` {r}
+
+cv_model <- cv.glmnet(x, y, alpha = 1)
+best_lambda <- cv_model$lambda.min
+
+#display optimal lambda value
+best_lambda
+```
+The lambda value that minimizes the test MSE turns out to be 2.431182.
+
+
+# Plot the test MSE's vs. lambda values
+```{r}
+plot(cv_model)
+```
+
+# Coefficients of best model 
+```{r}
+
+best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+```
+the coefficient of the `dart` becomes exactly equal to 0 ,it get completely dropped the model.
+
+# Prediction for the response value of a new observation
+```{r}
+
+new = matrix(c(24, 2.5, 3.5, 18.5), nrow=1, ncol=4) 
+predict(best_model, s = best_lambda, newx = new)
+```
+ based on the new input value as a test data , model predict that car have  an hp value of 106.6893.
+ 
+ 
+# Lasso trace plot
+```{r}
+plot(model,xvar = "lambda")
+```
+variables becomes exactly equal to 0 as lambda increases.
+
+
+# Find R-squared of model on training data
+```{r}
+
+y_predicted <- predict(best_model, s = best_lambda, newx = x)
+
+sst <- sum((y - mean(y))^2)
+sse <- sum((y_predicted - y)^2)
+
+rsq <- 1 - sse/sst
+rsq
+```
+R-squared turns out to be  0.8047064 which means 80.47% of the variation in the response is explained by model.

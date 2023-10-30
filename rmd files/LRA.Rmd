@@ -1,0 +1,130 @@
+---
+title: "LOGISTIC REGRESSION ANALYSIS"
+author: "mohammed Swaned"
+date: "2022-12-17"
+output: html_document
+---
+
+\newpage
+
+ * Name         :Mohammed Swaned M
+ * Faculty No   :22DSMSA104
+ * Enrollment No:GN4994
+ 
+ 
+# Logistic Regression Analysis
+## Question No.1
+
+### Read the data:
+
+```{r}
+House=readxl::read_xlsx("~/342.xlsx")
+House
+names(House)
+```
+### Fit the Logistic Model
+we will fit a logistic regression model in order to predict Home Ownership status using Income. The glm() function can be used to fit glm() many types of generalized linear models, including logistic regression.The syntax of the glm() function is similar to that of lm(), except that we must pass in the argument family= binomial in order to tell R to run a logistic regression rather than some other type of generalized linear model.
+
+```{r}
+y=House$`Home Ownership Status`
+x=House$Income
+logist= glm(y~x,family = "binomial",data = House)
+summary(logist)
+```
+Since p-value is greater than 0.05. Then the variable is insignificant
+
+### Deviance Analysis
+
+```{r}
+M1=anova(logist,test = "Chisq")
+M1
+```
+$\chi^2$value=Null Deviance-Residual Deviance=24.731-21.390 = 3.341. Here df=1,p-value associated with $\chi^2$ value 3.341 with df=1 is 0.06757 .Since it is greater than 0.05.we can say that the model is not much useful.
+
+\newpage
+**Remark**
+```{r}
+logist$coefficients
+```
+since $\beta_1>0$, As income increases we can say that probability of house ownership increases
+
+### Quadratic Model of the data
+```{r}
+x2=x^2
+logist2=glm(y~x+x2,data=House,family = "binomial")
+summary(logist2)
+```
+As we can see when add quadratic term in the model all the variables are insignificant. Therefore there is no need for quadratic term in the model
+
+\newpage
+## Question No.2
+### Read the data
+```{r}
+library(ISLR2)
+Data=Default
+head(Data)
+```
+### fit the logistic Model
+
+```{r}
+Data$default=as.factor(Data$default)
+Data$student=as.factor(Data$student)
+M3=glm(default~student+balance+income,data=Data,family=binomial)
+summary(M3)
+
+```
+we can omit Income variable
+```{r}
+M4=glm(default~student+balance,data=Data,family=binomial)
+summary(M4)
+glm.prob=predict(M4,type = "response")
+glm.prob[1:5]
+```
+The following two commands create a vector of class predictions based on whether the predicted probability of a default is greater than or less than 0.5.
+
+```{r}
+glm.pred=rep("No",10000)
+glm.pred[glm.prob>0.5]="Yes"
+head(glm.pred)
+```
+The first command creates a vector of 10,000 NO elements. The second line transforms to YES all of the elements for which the predicted probability of a default increase or exceeds 0.5.
+
+**Confusion Matrix** : Confusion matrix in order to determine how many observations were correctly or incorrectly classified.
+
+```{r}
+default=Data$default
+table(glm.pred, default)
+mean(glm.pred == default)
+```
+
+### Fitting Model Using Validation set Approach( Or Train and Test Data)
+In order to better assess the accuracy of the logistic regression model in this setting, we can fit the model using part of the data, and then examine how well it predicts the held out data.
+
+```{r}
+balance <- Data$balance
+data <- (balance<1200)
+train <- as.data.frame(Default[data,])
+dim(train)
+test <- Data[!data,]
+dim(test)   
+testDefault <- default[!data]
+```
+#### fitting the model
+```{r}
+train = Default[1:7000,]
+test = Default[7001:10000,]
+testDefault = test$default
+gm.fit = glm(default ~ student + balance,data = train,family ='binomial')
+summary(gm.fit)
+gm.prob2 = predict(gm.fit,test, type = 'response')
+head(gm.prob2)
+contrasts(default)
+gm.pred2 = rep("No", 3000)
+gm.pred2[gm.prob2>0.5]= "Yes"
+head(gm.pred2)
+table(gm.pred2, testDefault)
+mean(gm.pred2 == testDefault)
+```
+Earlier one has 0.9733 accuracy , whereas validation set approach has 0.9763333. So the later is more accurate
+
+

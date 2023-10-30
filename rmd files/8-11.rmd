@@ -1,0 +1,184 @@
+---
+title: "Untitled"
+author: "ABDUL RAUF"
+date: "2023-01-14"
+output: html_document
+---
+ 
+ 
+\begin{center} * LAB  8-11 * \end{center}
+\newpage
+
+                        __NAME__:-**ABDUL RAUF** \
+                        __ENRL NO__:-**GL6092** \
+                        __ROLL NO__:-**22DSMSA116** \   
+
+
+#  Validation set approach
+
+## reading the data from excel
+
+```{r,warning=FALSE}
+solubility<-read.csv("solubility.csv")
+head(solubility)
+y=solubility$y
+x1=solubility$X1
+x2=solubility$x2
+x3=solubility$X3
+plot(solubility)
+
+```
+
+
+## Dividing the data into train set and fitting it.
+
+```{r,warning=FALSE}
+train=sample(26,13)
+lm.fit<-lm(y~.,data = solubility, subset = train)
+
+attach(solubility)
+
+mselm=mean((y-predict(lm.fit,solubility))[-train]^2) #MSE
+
+
+lm.fit21<-lm(solubility$y~poly(solubility$X1,2)+poly(solubility$X2,2)+poly(solubility$X3,2),data = solubility,subset = train)  #fitting of all variables with `poly()` upto quadratic term
+lm.fit21
+mse2=mean((y-predict(lm.fit21,solubility))[-train]^2) #MSE of quadratic regression of all variables
+mse2
+lm.fit22<-lm(y~poly(X2,2),data = solubility,subset = train)
+lm.fit22
+
+mse22=mean((y-predict(lm.fit22,solubility))[-train]^2)  #MSE of quadratic regression of x2 variable
+
+lm.fit23<-lm(y~poly(X3,2),data = solubility,subset = train)
+lm.fit23
+
+mse23=mean((y-predict(lm.fit23,solubility))[-train]^2)   #MSE of quadratic regression of x3 variable
+
+mse=cbind(mselm,mse21,mse22,mse23)
+mse
+```
+$\bullet$ MSE of the model having the no any higher degree polynomial is lowest among all of them.
+
+## fitting the data using `poly()` and calculating the MSE
+
+```{r,warning=FALSE}
+#for all variables
+n=10
+mse_all=numeric(n)
+for (i in 1:10) {
+  M1=lm(solubility$y~poly(solubility$X1,i)+poly(solubility$X2,i)+poly(solubility$X3,i),data = solubility,subset = train)
+ mse_all[i]=mean((y-predict(M1,solubility))[-train]^2)
+  
+}
+mse_all
+
+
+#for x2
+n=10
+mse_x2=numeric(n)
+for (i in 1:10) {
+  M2=lm(y~poly(X2,i),data = solubility,subset = train)
+ mse_x2[i]=mean((y-predict(M2,solubility))[-train]^2)
+  
+}
+mse_x2
+
+
+#for x3
+n=10
+mse_x3=numeric(n)
+for (i in 1:10) {
+  M3=lm(y~poly(x3,i),data = solubility,subset = train)
+ mse_x3[i]=mean((y-predict(M3,solubility))[-train]^2)
+  
+}
+mse_x3
+
+mse=cbind(mse_x1,mse_x2,mse_x3)
+mse
+
+
+```
+$\bullet$ Model containing all the variables performs better for the quadratic function as it has the lowest MSE ,after that  MSE increases.
+
+$\bullet$ MSE for the model containing x2 variable also performs better for the quadratic function than  the other functions.
+
+$\bullet$ MSE for the model having x3 variable  performs better for the seventh function than the  other functions.
+
+$\bullet$ MSE for the  model having only x3 variable is best than other models as its MSE is lowest .
+
+
+# Leave One Out Cross Validation
+ 
+```{r,warning=FALSE}
+solubility<-read.csv("solubility.csv")
+head(solubility)
+attach(solubility)
+
+library(boot)
+loo.fit=glm(y~X1+X2+X3,data = solubility)
+coef(loo.fit)
+looVald_err=cv.glm(solubility,loo.fit) #MSE
+looVald_err$delta[1]
+
+looVald=rep(0,10)
+for (k in 1:10) {
+  glm=glm(solubility$y~poly(solubility$X1,k)+poly(solubility$X2,k)+poly(solubility$X3,k),data = solubility)
+  looVald[k]=cv.glm(solubility,glm)$delta[1] #MSE
+  
+}
+
+looVald
+
+
+
+```
+
+```{r,warning=FALSE}
+looVald_x2=rep(0,10)
+for (l in 1:10) {
+  glm2=glm(solubility$y~poly(solubility$X2,l),data = solubility)
+  looVald_x2[l]=cv.glm(solubility,glm2)$delta[1] #MSE
+  
+}
+
+looVald_x2
+
+looVald_x3=rep(0,10)
+for (m in 1:10) {
+  glm3=glm(solubility$y~poly(solubility$X3,l),data = solubility)
+  looVald_x3[l]=cv.glm(solubility,glm3)$delta[1] #MSE
+  
+}
+
+looVald_x3
+
+
+```
+
+
+$\bullet$ There is no sharp drop in the estimated test MSE ,so there is no clear improvement  from using higher-order polynomials.
+
+
+# K-Fold Cross Validation
+
+```{r,warning=FALSE}
+kfold_cv.err<-rep(0,10)
+for (i in 1:10) {
+  kfold.fit<-glm(solubility$y~poly(solubility$X1,i)+poly(solubility$X2,i)+poly(solubility$X3,i),data = solubility)
+  
+  kfold_cv.err[i]<-cv.glm(solubility,kfold.fit,K=10)$delta[1]
+}
+
+kfold_cv.err
+
+MSE=cbind(looVald,kfold_cv.err)
+MSE
+```
+
+$\bullet$ The computational time is shorter than that of LOOCV . 
+
+$\bullet$ MSE of the quadratic ,cubic or higher order polynomial has lower MSE but not as much that should be considered so only linear variables would be considered in our  model.
+
+

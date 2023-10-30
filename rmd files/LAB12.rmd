@@ -1,0 +1,192 @@
+---
+title: "LAB12"
+author: "ABDUL RAUF"
+date: "2023-02-24"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+\begin{center} * LAB  12 * \end{center}
+\newpage
+
+                        __NAME__:-**ABDUL RAUF**
+                        __ENRL NO__:-**GL6092** 
+                        __ROLL NO__:-**22DSMSA116**    
+
+
+
+
+# Read the data
+
+```{r}
+library(ISLR2)
+names(Hitters)
+dim(Hitters)    
+sum(is.na(Hitters$Salary)) #number of missing values in dataset
+Hitters<- na.omit(Hitters)  # removing the data containing the missing values
+dim(Hitters)
+```
+
+## Best Subset Selection
+
+The best subsets regression procedure (also known as the all possible subsets regression procedure),the general idea behind best subsets regression is that we select the subset of predictors that do the best at meeting some well defined objective criterion, such as having the largest R square or the smallest MSE.
+
+Best subset regression is an alternative to both Forward and Backward stepwise regression. Forward stepwise selection adds one variable at a time based on the lowest residual sum of squares until no more variables continue to lower the residual sum of squares. Backward stepwise regression starts with all variables in the model and removes variables one at a time. The concern with stepwise methods is they can produce biased regression coefficients, conflicting models, and inaccurate confidence intervals.
+
+```{r}
+library(leaps)
+regfit.full<- regsubsets(Salary~.,Hitters)
+summary(regfit.full)
+```
+An asterisk indicates that a given variable is included in the corresponding model. For instance, this output indicates that the best two-variable model contains only Apps and Private. By default, `regsubsets()` only reports results up to the best eight variable model. But the nvmax option can be used in order to return as many variables as are desired. Here we fit up to a 19-variable model.
+
+```{r}
+regfit.full<- regsubsets(Salary~.,data=Hitters,nvmax=19)
+reg.summary<- summary(regfit.full)
+names(reg.summary)
+reg.summary$rsq #R-square
+```
+
+Plotting RSS, adjusted R2, Cp, and BIC for all of the models at once will help us decide which model to select.
+
+```{r}
+par(mfrow=c(2,2))
+plot(reg.summary$rss , xlab = "Number of Variables", ylab = "RSS", type = "l") # type1 is for line
+
+plot(reg.summary$adjr2 , xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l")
+adjr2.max=which.max(reg.summary$adjr2)
+
+plot(reg.summary$cp , xlab = "Number of Variables", ylab = "Cp", type = "l")
+
+cp.min=which.min(reg.summary$cp)
+
+points(cp.min,reg.summary$cp[cp.min] , col = "red", cex = 2, pch = 20)
+bic.min=which.min(reg.summary$bic)
+plot(reg.summary$bic , xlab = "Number of Variables", ylab = "BIC", type = "l")
+points(bic.min, reg.summary$bic[bic.min] , col = "red", cex = 2, pch = 20)
+```
+
+### PLOT
+
+The regsubsets() function has a built in plot() command which can be used to display the selected variables for the best model with a given number of predictors, ranked according to the BIC, Cp, adjusted R2, or AIC.
+
+```{r}
+plot(regfit.full , scale = "r2")
+plot(regfit.full , scale = "adjr2")
+plot(regfit.full , scale = "Cp")
+plot(regfit.full , scale = "bic")
+```
+
+
+
+
+The top row of each plot contains a black square for each variable selected according to the optimal model associated with that statistic. For instance, we see that several models share a BIC close to −150. However, the model with the lowest BIC is the six variable model that contains only AtBat, Hits, Walks, CRBI, DivisionW, and PutOuts. We can use the coef() function to see the coefficient estimates associated with this model.
+```{r}
+coef(regfit.full , 6)
+```
+
+
+
+## Forward and Backward Selection Method
+
+ the `regsubsets()` function is used to perform forward or backward stepwise selection, using the argument method = "forward" or method = "backward".
+
+### Forward stepwise selection method 
+
+```{r}
+subfit.fwd=regsubsets(Salary~.,data = Hitters,nvmax = 19,method = "forward")
+summary(subfit.fwd)
+```
+
+### Backward stepwise selection method 
+
+```{r}
+subfit.bwd=regsubsets(Salary~.,data = Hitters,nvmax = 19,method = "backward")
+summary(subfit.bwd)
+```
+
+### Choosing Among Models Using the Validation-Set Approach and Cross Validation
+
+```{r}
+set.seed(1)
+train <- sample(c(TRUE,FALSE),nrow(Hitters), replace = TRUE)
+test <- (! train)
+```
+Now, we apply regsubsets() to the training set in order to perform best
+subset selection.
+```{r}
+regfit.best <- regsubsets(Salary ~ ., data = Hitters [train , ], nvmax = 19)
+```
+We now make a model matrix from the test data.
+```{r}
+test.mat <- model.matrix(Salary ~ ., data = Hitters [test , ])
+```
+We now compute the validation set error for the best model of each model size. 
+```{r}
+val.errors <- rep(NA , 19)
+for (i in 1:19) {
+ coefi<- coef(regfit.best , id = i)
+ pred<- test.mat[, names(coefi)] %*% coefi
+ val.errors[i] <- mean((Hitters$Salary[test] - pred)^2)
+}
+```
+We find that the best model is the one that contains seven variables.
+```{r}
+val.errors
+which.min(val.errors)
+coef(regfit.best , 7)
+```
+We will be using `regsubsets()` function
+```{r}
+predict.regsubsets <- function(object , newdata , id , ...) {
+ form <- as.formula(object$call[[2]])
+ mat <- model.matrix(form , newdata)
+ coefi <- coef(object , id = id)
+ xvars <- names ( coefi )
+ mat[, xvars] %*% coefi
+  }
+```
+Finally, we perform best subset selection on the full data set, and select the best seven-variable model.
+```{r}
+regfit.best <- regsubsets(Salary ~ ., data = Hitters , nvmax = 19)
+coef(regfit.best , 7)
+```
+Now we create a vector that allocates each observation to one of k = 10 folds, and we create a matrix in which we will store the results.
+```{r}
+k <- 10
+ n <- nrow(Hitters)
+ set.seed(1)
+ folds <- sample(rep(1:k, length = n))
+ cv.errors <- matrix(NA , k, 19, dimnames = list (NULL , paste (1:19) ))
+```
+
+Now we write a for loop that performs cross validation. 
+```{r}
+for (j in 1:k) {
+ best.fit <- regsubsets(Salary ~ ., data = Hitters[folds != j, ], nvmax = 19)
+ for (i in 1:19) {
+ pred <- predict(best.fit , Hitters[folds == j, ], id = i)
+ cv.errors[j, i] <- mean(( Hitters$Salary[folds == j] - pred ) ^2)
+ }
+ }
+```
+This has given us a 10×19 matrix. We use the apply() function to average over the columns of this matrix in order to obtain a vector for which the ith element is the cross validation error for the i variable model.
+```{r}
+mean.cv.errors <- apply(cv.errors , 2, mean)
+mean.cv.errors
+par(mfrow = c(1,1))
+plot(mean.cv.errors , type = "b")
+```
+We see that cross validation selects a 10 variable model. We now perform
+best subset selection on the full data set in order to obtain the 10 variable model.
+```{r}
+reg.best <- regsubsets(Salary ~ ., data = Hitters , nvmax = 19)
+coef(reg.best , 10)
+```
+
+
+
+
+
